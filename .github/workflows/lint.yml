@@ -1,0 +1,32 @@
+name: Lint
+
+on:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lint markdown report
+        run: |
+          set -e
+          python3 - <<'EOF'
+          import glob
+          import sys
+
+          files = sorted(glob.glob("**/*.md", recursive=True))
+          if not files:
+              print("FAIL: no markdown files found")
+              sys.exit(1)
+          for f in files:
+              with open(f, "r", encoding="utf-8") as fh:
+                  text = fh.read()
+              if not text.strip():
+                  print(f"FAIL: {f} is empty")
+                  sys.exit(1)
+              print(f"OK: {f} ({len(text)} chars)")
+          print(f"Markdown lint passed: {len(files)} file(s)")
+          EOF
